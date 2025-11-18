@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GENJUTSU CHEAT UID BYPASS</title>
+<style>
+body {
+  font-family: 'Segoe UI', Arial, sans-serif;
+  margin: 0;
+  padding: 20px;
+  background: radial-gradient(circle at top left, #1a0000, #000);
+  color: #fff;
+}
+h2 {
+  text-align: center;
+  font-size: 2.5em;
+  color: #ff4c4c;
+  text-shadow: 0 0 10px #ff1a1a, 0 0 25px #ff4c4c;
+  margin-bottom: 30px;
+}
+.container {
+  max-width: 700px;
+  margin: auto;
+}
+
+/* API Key */
+#apiKeyInput {
+  width: 100%;
+  padding: 12px;
+  margin-bottom: 10px;
+  border-radius: 12px;
+  border: none;
+  background: rgba(255,255,255,0.05);
+  color: #fff;
+  font-size: 1em;
+  text-align: center;
+  box-shadow: 0 0 10px rgba(255,76,76,0.5);
+  transition: 0.3s;
+}
+#apiKeyInput::placeholder { color: #ff9999; }
+#saveApiKey {
+  width: 100%;
+  padding: 12px;
+  border: none;
+  border-radius: 12px;
+  background: rgba(255,76,76,0.5);
+  color: #fff;
+  font-weight: bold;
+  font-size: 1em;
+  cursor: pointer;
+  transition: 0.3s;
+  margin-bottom: 25px;
+}
+#saveApiKey:hover {
+  background: rgba(255,76,76,0.8);
+  box-shadow: 0 0 20px #ff4c4c;
+  transform: scale(1.03);
+}
+
+/* UID Input */
+#uidInputWrapper {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+#newUid {
+  flex: 1;
+  min-width: 200px;
+  padding: 14px;
+  border-radius: 15px;
+  border: none;
+  background: rgba(255,255,255,0.05);
+  color: #fff;
+  font-size: 1em;
+  transition: 0.3s;
+  box-shadow: 0 0 10px rgba(255,76,76,0.5);
+}
+#newUid::placeholder { color: #ff9999; }
+#addUidBtn {
+  padding: 14px 25px;
+  border-radius: 15px;
+  border: none;
+  background: rgba(255,76,76,0.5);
+  color: #fff;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.3s;
+}
+#addUidBtn:hover {
+  background: rgba(255,76,76,0.8);
+  box-shadow: 0 0 20px #ff4c4c;
+  transform: scale(1.05);
+}
+#deleteAllBtn {
+  padding: 12px 20px;
+  border-radius: 12px;
+  border: none;
+  background: rgba(255,76,76,0.4);
+  color: #fff;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.3s;
+  margin-bottom: 20px;
+}
+#deleteAllBtn:hover {
+  background: rgba(255,76,76,0.8);
+  box-shadow: 0 0 20px #ff4c4c;
+  transform: scale(1.03);
+}
+
+/* UID Cards */
+#uidList { margin-top: 20px; }
+.uid-card {
+  background: rgba(255,255,255,0.05);
+  backdrop-filter: blur(15px);
+  border-left: 5px solid #ff4c4c;
+  padding: 15px;
+  margin: 12px 0;
+  border-radius: 15px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 0 15px rgba(255,76,76,0.5);
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+.uid-card:hover {
+  transform: rotateY(3deg) scale(1.02);
+  box-shadow: 0 0 30px #ff4c4c;
+}
+.uid-info span {
+  font-weight: bold;
+  text-shadow: 0 0 5px #ff1a1a;
+  word-break: break-all;
+}
+.card-buttons {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+.card-buttons button {
+  border-radius: 10px;
+  border: none;
+  padding: 6px 12px;
+  cursor: pointer;
+  transition: 0.3s;
+  font-size: 0.9em;
+}
+.card-buttons button:hover {
+  background: rgba(255,76,76,0.8);
+  box-shadow: 0 0 10px #ff4c4c;
+}
+
+/* Responsive */
+@media(max-width:600px){
+  #uidInputWrapper { flex-direction: column; }
+  #addUidBtn { width: 100%; }
+}
+</style>
+</head>
+<body>
+<h2>🌌 GENJUTSU CHEAT UID BYPASS 🌌</h2>
+<div class="container">
+
+<input id="apiKeyInput" placeholder="Enter API Key">
+<button id="saveApiKey">💾 Save API Key</button>
+
+<div id="uidInputWrapper">
+  <input id="newUid" placeholder="Enter UID">
+  <button id="addUidBtn">Add UID</button>
+</div>
+<button id="deleteAllBtn">Delete All</button>
+
+<div id="uidList"></div>
+</div>
+
+<script>
+const WORKER_URL="https://uidbypass.arafatxvalorent.workers.dev/";
+let API_KEY = localStorage.getItem("apiKey") || "";
+document.getElementById("apiKeyInput").value = API_KEY;
+
+// Save API Key
+document.getElementById("saveApiKey").addEventListener("click", () => {
+  const key = document.getElementById("apiKeyInput").value.trim();
+  if(!key) return alert("Enter API Key");
+  API_KEY = key;
+  localStorage.setItem("apiKey", API_KEY);
+  alert("API Key Saved!");
+});
+
+// UID Data
+let uidData = [];
+
+// Load UIDs
+async function loadUids(){
+  if(!API_KEY) return alert("Enter API Key to load UIDs");
+  try{
+    const res = await fetch(WORKER_URL, {method:"GET"});
+    const data = await res.json();
+    uidData = data.uids.map(u=>({uid:u}));
+    render();
+  }catch(err){ console.error(err); }
+}
+
+// Render UID cards
+function render(){
+  const container = document.getElementById("uidList");
+  container.innerHTML = "";
+  uidData.forEach(u=>{
+    const div = document.createElement("div");
+    div.className = "uid-card";
+    div.innerHTML = `
+      <div class="uid-info"><span>${u.uid}</span></div>
+      <div class="card-buttons">
+        <button onclick="editUid('${u.uid}')">✏️ Edit</button>
+        <button onclick="deleteUid('${u.uid}')">🗑️ Delete</button>
+      </div>`;
+    container.appendChild(div);
+  });
+}
+
+// Add UID
+document.getElementById("addUidBtn").addEventListener("click", async ()=>{
+  if(!API_KEY) return alert("Enter API Key first");
+  const uid = document.getElementById("newUid").value.trim();
+  if(!uid) return alert("Enter UID");
+  if(uidData.some(x=>x.uid===uid)) return alert("Already Added");
+
+  uidData.push({uid});
+  await fetch(WORKER_URL,{
+    method:"POST",
+    headers:{"Content-Type":"application/json","X-API-Key":API_KEY},
+    body:JSON.stringify({uid})
+  });
+  document.getElementById("newUid").value="";
+  loadUids();
+});
+
+// Delete UID
+async function deleteUid(uid){
+  uidData = uidData.filter(x=>x.uid!==uid);
+  await fetch(WORKER_URL,{
+    method:"POST",
+    headers:{"Content-Type":"application/json","X-API-Key":API_KEY},
+    body:JSON.stringify({uid,action:"delete"})
+  });
+  loadUids();
+}
+
+// Edit UID
+function editUid(uid){
+  const newUid = prompt("Edit UID", uid);
+  if(!newUid) return;
+  deleteUid(uid);
+  uidData.push({uid:newUid});
+  fetch(WORKER_URL,{
+    method:"POST",
+    headers:{"Content-Type":"application/json","X-API-Key":API_KEY},
+    body:JSON.stringify({uid:newUid})
+  }).then(loadUids);
+}
+
+// Delete All
+document.getElementById("deleteAllBtn").addEventListener("click", ()=>{
+  uidData.forEach(u=>deleteUid(u.uid));
+});
+
+// Initial load
+if(API_KEY) loadUids();
+</script>
+</body>
+</html>
